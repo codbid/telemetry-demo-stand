@@ -1,0 +1,64 @@
+slo:
+  rules:
+    - name: global-error-rate
+      service: ALL
+      operation: ALL
+      kind: ALL
+      window: 1m
+      metric: ERROR_RATE
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 0.05
+
+    - name: global-p95-latency
+      service: ALL
+      operation: ALL
+      kind: ALL
+      window: 1m
+      metric: P95_LATENCY_MS
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 500
+
+    - name: all-http-error-rate
+      service: TelemetryDemo
+      operation: ALL
+      kind: HTTP
+      window: 1m
+      metric: ERROR_RATE
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 0.05
+
+    - name: all-http-p95-latency
+      service: TelemetryDemo
+      operation: ALL
+      kind: HTTP
+      window: 1m
+      metric: P95_LATENCY_MS
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 500
+
+    - name: all-business-p95-latency
+      service: TelemetryDemo
+      operation: ALL
+      kind: BUSINESS
+      window: 1m
+      metric: P95_LATENCY_MS
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 500
+
+    - name: fail-endpoint-error-rate
+      service: TelemetryDemo
+      operation: "GET /fail"
+      kind: HTTP
+      window: 1m
+      metric: ERROR_RATE
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 0.05
+
+    - name: slow-endpoint-p95-latency
+      service: TelemetryDemo
+      operation: "GET /slow"
+      kind: HTTP
+      window: 1m
+      metric: P95_LATENCY_MS
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 800

@@ -1,0 +1,91 @@
+version: '3.9'
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  telemetry-aggregator:
+    image: ghcr.io/codbid/telemetry-aggregator:latest
+    container_name: telemetry-aggregator
+    depends_on:
+      - kafka
+    environment:
+      SERVER_PORT: 8080
+      SPRING_CONFIG_IMPORT: optional:file:/app/config/application.yaml
+    volumes:
+      - ./configs/aggregator/application.yaml:/app/config/application.yaml:ro
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+  slo-checker:
+    image: ghcr.io/codbid/slo-checker:latest
+    container_name: slo-checker
+    depends_on:
+      - prometheus
+    environment:
+      SERVER_PORT: 8080
+      SPRING_CONFIG_IMPORT: optional:file:/app/config/application.yaml,optional:file:/app/config/rules.yaml
+    volumes:
+      - ./configs/slo-checker/application.yaml:/app/config/application.yaml:ro
+      - ./configs/slo-checker/rules.yaml:/app/config/rules.yaml:ro
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    container_name: telemetry-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yaml"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: telemetry-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/telemetry-dashboard.json
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  kafka-data:
+  grafana-data:

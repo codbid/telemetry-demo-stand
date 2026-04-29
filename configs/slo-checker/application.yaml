@@ -1,0 +1,8 @@
+slo:
+  check-interval: 10s
+
+  metrics:
+    refresh-interval: 5s
+
+  prometheus:
+    url: http://prometheus:9090

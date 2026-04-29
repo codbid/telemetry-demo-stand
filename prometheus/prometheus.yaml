@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "telemetry-aggregator"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets:
+          - "telemetry-aggregator:8080"
+
+  - job_name: "slo-checker"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets:
+          - "slo-checker:8080"
