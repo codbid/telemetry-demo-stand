@@ -29,10 +29,33 @@
     <properties>
         <java.version>21</java.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/codbid/telemetry-starter</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
+            <groupId>com.codbid.telemetry</groupId>
+            <artifactId>telemetry-starter</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+            <version>3.5.13</version>
         </dependency>
 
         <dependency>

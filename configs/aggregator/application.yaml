@@ -16,10 +16,19 @@ telemetry:
     windows:
       - name: "1m"
         duration: 1m
-        retention: 2m
+        retention: 10m
       - name: "5m"
         duration: 5m
         retention: 2h
+      - name: "30m"
+        duration: 30m
+        retention: 2h
+      - name: "1h"
+        duration: 1h
+        retention: 10h
+      - name: "6h"
+        duration: 6h
+        retention: 10h
 
   kafka:
     topics:

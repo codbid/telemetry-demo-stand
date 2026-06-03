@@ -1,10 +1,10 @@
 {
   "uid": "telemetry-overview",
-  "title": "Telemetry Overview",
-  "tags": ["telemetry", "sli", "slo"],
+  "title": "Обзор телеметрии",
+  "tags": ["телеметрия", "SLI", "SLO"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "refresh": "5s",
   "time": {
     "from": "now-15m",
@@ -14,366 +14,125 @@
     "list": [
       {
         "name": "service",
+        "label": "Сервис",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
         "query": "label_values(telemetry_window_requests, service)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+        "current": { "selected": true, "text": "Все", "value": "$__all" }
       },
       {
         "name": "operation",
+        "label": "Операция",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
         "query": "label_values(telemetry_window_requests{service=~\"$service\"}, operation)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
-      },
-      {
-        "name": "window",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "label_values(telemetry_window_requests, window)",
-        "refresh": 1,
-        "includeAll": false,
-        "multi": false,
-        "current": {
-          "selected": true,
-          "text": "1m",
-          "value": "1m"
-        }
+        "current": { "selected": true, "text": "Все", "value": "$__all" }
       },
       {
         "name": "kind",
+        "label": "Тип",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "label_values(telemetry_window_requests, kind)",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(telemetry_window_requests{service=~\"$service\",operation=~\"$operation\"}, kind)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+        "current": { "selected": true, "text": "Все", "value": "$__all" }
+      },
+      {
+        "name": "window",
+        "label": "Окно",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(telemetry_window_requests, window)",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1,
+        "current": { "selected": true, "text": "1m", "value": "1m" }
       },
       {
         "name": "slo_rule",
+        "label": "Правило SLO",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
         "query": "label_values(slo_rule_status, rule)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+        "current": { "selected": true, "text": "Все", "value": "$__all" }
       },
       {
         "name": "slo_status",
+        "label": "Статус SLO",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
         "query": "label_values(slo_rule_status, status)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
-      },
-      {
-        "name": "slo_metric",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "label_values(slo_rule_status, metric)",
-        "refresh": 1,
-        "includeAll": true,
-        "multi": true,
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+        "current": { "selected": true, "text": "Все", "value": "$__all" }
       }
     ]
   },
   "panels": [
     {
       "id": 1,
-      "type": "timeseries",
-      "title": "RPS by operation",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "type": "stat",
+      "title": "Статус SLO",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_rps{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
+      "targets": [{ "expr": "sum(slo_violations) > bool 0", "refId": "A" }],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps"
+          "unit": "short",
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Норма", "color": "green" },
+                "1": { "text": "Нарушены", "color": "red" }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
       }
     },
     {
       "id": 2,
-      "type": "timeseries",
-      "title": "Error rate (%)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_error_rate{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"} * 100",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "id": 3,
-      "type": "timeseries",
-      "title": "P95 latency",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_latency_p95_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "P99 latency",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_latency_p99_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "id": 5,
-      "type": "timeseries",
-      "title": "Requests",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Errors",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}",
-          "legendFormat": "{{service}} {{operation}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "id": 7,
       "type": "stat",
-      "title": "SLO Rules",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 24 },
+      "title": "Нарушения SLO",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "slo_rules",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 8,
-      "type": "stat",
-      "title": "SLO Results",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "slo_results",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 9,
-      "type": "stat",
-      "title": "SLO Violations",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "slo_violations",
-          "refId": "A"
-        }
-      ],
+      "targets": [{ "expr": "sum(slo_violations)", "refId": "A" }],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -389,173 +148,237 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
         "orientation": "auto",
         "textMode": "auto",
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 10,
-      "type": "stat",
-      "title": "SLO Health",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "slo_violations > bool 0",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OK",
-                  "color": "green"
-                },
-                "1": {
-                  "text": "VIOLATED",
-                  "color": "red"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "value",
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center"
       }
     },
     {
+      "id": 3,
+      "type": "stat",
+      "title": "Правила SLO",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(slo_rules)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Проверки SLO",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(slo_results)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Запросы в секунду",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (service, operation, kind) (telemetry_window_rps{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Доля ошибок",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "100 * sum by (service, operation, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}) / clamp_min(sum by (service, operation, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}), 1)",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Задержка P95",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "max by (service, operation, kind) (telemetry_window_latency_p95_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Задержка P99",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "max by (service, operation, kind) (telemetry_window_latency_p99_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Запросы за окно",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (service, operation, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Ошибки за окно",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (service, operation, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } }
+    },
+    {
       "id": 11,
-      "type": "table",
-      "title": "SLO Violated Rules",
+      "type": "timeseries",
+      "title": "SLO по ошибкам: факт и порог",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "slo_rule_status{status=\"VIOLATED\",rule=~\"$slo_rule\",metric=~\"$slo_metric\"}",
-          "legendFormat": "{{rule}} | {{operation}} | {{metric}}",
-          "refId": "A",
-          "instant": true,
-          "format": "table"
+          "expr": "100 * slo_rule_actual_value{rule=~\"$slo_rule\",metric=\"ERROR_RATE\",status=~\"$slo_status\"}",
+          "legendFormat": "факт | {{rule}} | {{operation}}",
+          "refId": "A"
+        },
+        {
+          "expr": "100 * slo_rule_threshold{rule=~\"$slo_rule\",metric=\"ERROR_RATE\",status=~\"$slo_status\"}",
+          "legendFormat": "порог | {{rule}} | {{operation}}",
+          "refId": "B"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } }
     },
     {
       "id": 12,
-      "type": "table",
-      "title": "SLO Actual Values for Violations",
+      "type": "timeseries",
+      "title": "SLO по задержке P95: факт и порог",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "slo_rule_actual_value{status=\"VIOLATED\",rule=~\"$slo_rule\",metric=~\"$slo_metric\"}",
-          "legendFormat": "{{rule}} | {{operation}} | {{metric}}",
+          "expr": "slo_rule_actual_value{rule=~\"$slo_rule\",metric=\"P95_LATENCY_MS\",status=~\"$slo_status\"}",
+          "legendFormat": "факт | {{rule}} | {{operation}}",
+          "refId": "A"
+        },
+        {
+          "expr": "slo_rule_threshold{rule=~\"$slo_rule\",metric=\"P95_LATENCY_MS\",status=~\"$slo_status\"}",
+          "legendFormat": "порог | {{rule}} | {{operation}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Нарушенные правила SLO",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "slo_rule_actual_value{status=\"VIOLATED\",rule=~\"$slo_rule\"}",
+          "legendFormat": "{{rule}} | {{service}} | {{operation}} | {{metric}}",
           "refId": "A",
           "instant": true,
           "format": "table"
         }
       ],
       "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 3
-        },
-        "overrides": []
+        "defaults": { "unit": "short", "decimals": 3 },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Value" },
+            "properties": [{ "id": "displayName", "value": "Фактическое значение" }]
+          }
+        ]
       },
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      }
-    },
-    {
-      "id": 13,
-      "type": "timeseries",
-      "title": "SLO Actual vs Threshold",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "expr": "slo_rule_actual_value{rule=~\"$slo_rule\",metric=~\"$slo_metric\",status=~\"$slo_status\"}",
-          "legendFormat": "actual {{rule}} {{operation}}",
-          "refId": "A"
-        },
-        {
-          "expr": "slo_rule_threshold{rule=~\"$slo_rule\",metric=~\"$slo_metric\",status=~\"$slo_status\"}",
-          "legendFormat": "threshold {{rule}} {{operation}}",
-          "refId": "B"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
+      "options": { "showHeader": true, "cellHeight": "sm" }
     },
     {
       "id": 14,
       "type": "bargauge",
-      "title": "Current SLO Violations",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+      "title": "Текущие нарушения SLO",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 44 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "slo_rule_status{status=\"VIOLATED\",rule=~\"$slo_rule\",metric=~\"$slo_metric\"}",
-          "legendFormat": "{{rule}} | {{operation}}",
+          "expr": "slo_rule_status{status=\"VIOLATED\",rule=~\"$slo_rule\"}",
+          "legendFormat": "{{rule}} | {{service}} | {{operation}} | {{metric}}",
           "refId": "A",
           "instant": true
         }
@@ -568,10 +391,7 @@
             {
               "type": "value",
               "options": {
-                "1": {
-                  "text": "VIOLATED",
-                  "color": "red"
-                }
+                "1": { "text": "Нарушено", "color": "red" }
               }
             }
           ],
@@ -586,11 +406,7 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"],
-          "fields": ""
-        },
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
         "orientation": "horizontal",
         "displayMode": "gradient",
         "showUnfilled": false,

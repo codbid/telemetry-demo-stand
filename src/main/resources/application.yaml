@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: TelemetryDemo
+  profiles:
+    active: demo
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+telemetry:
+  kafka:
+    default-topic: telemetry-all
+#    topics:
+#      REQUEST: telemetry-success
+#      ERROR: telemetry-error
+
+    producer:
+      client-id: telemetry-demo-producer
+      linger-ms: 20
+      batch-size: 32768
+      compression-type: snappy

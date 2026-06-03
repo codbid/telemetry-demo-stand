@@ -78,6 +78,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_LANGUAGE: ru-RU
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/telemetry-dashboard.json
     volumes:
       - grafana-data:/var/lib/grafana
@@ -86,6 +87,31 @@ services:
       - prometheus
     restart: unless-stopped
 
+  load-generator:
+    image: curlimages/curl:8.11.1
+    container_name: telemetry-load-generator
+    volumes:
+      - ./load-generator/load.sh:/load.sh:ro
+    environment:
+      BASE_URL: "http://host.docker.internal:8080"
+      PROFILE: "normal"
+      PROFILE_ROTATION_ENABLED: "true"
+      PROFILE_ROTATE_SECONDS: "300"
+      PROFILE_SEQUENCE: "normal mixed degraded"
+
+      SLEEP_SECONDS: "0.2"
+      BATCH_SIZE: "4"
+      REQUEST_TIMEOUT_SECONDS: "5"
+      BURST_ENABLED: "true"
+      BURST_EVERY_ITERATIONS: "30"
+      BURST_REQUESTS: "20"
+    command: ["/bin/sh", "/load.sh"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - kafka
+      - telemetry-aggregator
+      - slo-checker
 volumes:
   kafka-data:
   grafana-data:
