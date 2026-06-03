@@ -14,6 +14,9 @@ telemetry:
   aggregation:
     cleanup-interval: 30s
     windows:
+      - name: "15s"
+        duration: 15s
+        retention: 30m
       - name: "1m"
         duration: 1m
         retention: 10m

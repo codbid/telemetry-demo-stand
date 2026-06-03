@@ -14,13 +14,16 @@ public class OrderService {
 
     private final PaymentService paymentService;
     private final AuditService auditService;
+    private final LoadPressureService loadPressureService;
 
     public OrderService(
             PaymentService paymentService,
-            AuditService auditService
+            AuditService auditService,
+            LoadPressureService loadPressureService
     ) {
         this.paymentService = paymentService;
         this.auditService = auditService;
+        this.loadPressureService = loadPressureService;
     }
 
     @Telemetry(
@@ -67,7 +70,8 @@ public class OrderService {
             tags = {"domain=orders", "stage=pricing"}
     )
     public BigDecimal calculatePrice() {
-        sleep(ThreadLocalRandom.current().nextLong(40, 120));
+        sleep(ThreadLocalRandom.current().nextLong(25, 80));
+        sleep(loadPressureService.latencyPenaltyMs(10, 700));
 
         int amount = ThreadLocalRandom.current().nextInt(1000, 12000);
         return BigDecimal.valueOf(amount, 2);

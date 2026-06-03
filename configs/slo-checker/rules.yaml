@@ -1,64 +1,73 @@
 slo:
   rules:
-    - name: global-error-rate
-      service: ALL
+    - name: global-error-rate-15s
+      service: TelemetryDemo
       operation: ALL
       kind: ALL
-      window: 1m
+      window: 15s
       metric: ERROR_RATE
       operator: LESS_THAN_OR_EQUAL
-      threshold: 0.05
+      threshold: 0.10
 
-    - name: global-p95-latency
-      service: ALL
+    - name: global-p95-latency-15s
+      service: TelemetryDemo
       operation: ALL
       kind: ALL
-      window: 1m
+      window: 15s
       metric: P95_LATENCY_MS
       operator: LESS_THAN_OR_EQUAL
-      threshold: 500
+      threshold: 900
 
-    - name: all-http-error-rate
+    - name: http-error-rate-15s
       service: TelemetryDemo
       operation: ALL
       kind: HTTP
-      window: 1m
+      window: 15s
       metric: ERROR_RATE
       operator: LESS_THAN_OR_EQUAL
-      threshold: 0.05
+      threshold: 0.10
 
-    - name: all-http-p95-latency
+    - name: http-p95-latency-15s
       service: TelemetryDemo
       operation: ALL
       kind: HTTP
-      window: 1m
+      window: 15s
       metric: P95_LATENCY_MS
       operator: LESS_THAN_OR_EQUAL
-      threshold: 500
+      threshold: 900
 
-    - name: all-business-p95-latency
+    - name: business-p95-latency-15s
       service: TelemetryDemo
       operation: ALL
       kind: BUSINESS
-      window: 1m
+      window: 15s
       metric: P95_LATENCY_MS
       operator: LESS_THAN_OR_EQUAL
-      threshold: 500
+      threshold: 600
 
-    - name: fail-endpoint-error-rate
+    - name: fail-endpoint-error-rate-15s
       service: TelemetryDemo
       operation: "GET /fail"
       kind: HTTP
-      window: 1m
+      window: 15s
       metric: ERROR_RATE
       operator: LESS_THAN_OR_EQUAL
       threshold: 0.05
 
-    - name: slow-endpoint-p95-latency
+    - name: slow-endpoint-p95-latency-15s
       service: TelemetryDemo
       operation: "GET /slow"
       kind: HTTP
-      window: 1m
+      window: 15s
       metric: P95_LATENCY_MS
       operator: LESS_THAN_OR_EQUAL
       threshold: 800
+
+    - name: flaky-endpoint-error-rate-15s
+      service: TelemetryDemo
+      operation: "GET /flaky"
+      kind: HTTP
+      window: 15s
+      metric: ERROR_RATE
+      operator: LESS_THAN_OR_EQUAL
+      threshold: 0.20

@@ -9,6 +9,12 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class AuditService {
 
+    private final LoadPressureService loadPressureService;
+
+    public AuditService(LoadPressureService loadPressureService) {
+        this.loadPressureService = loadPressureService;
+    }
+
     @Telemetry(
             operation = "saveAuditLog",
             component = "AuditService",
@@ -16,7 +22,8 @@ public class AuditService {
             tags = {"domain=audit", "stage=write"}
     )
     public void saveAuditLog(String entityId) {
-        sleep(ThreadLocalRandom.current().nextLong(15, 45));
+        sleep(ThreadLocalRandom.current().nextLong(10, 35));
+        sleep(loadPressureService.latencyPenaltyMs(5, 300));
     }
 
     private void sleep(long millis) {

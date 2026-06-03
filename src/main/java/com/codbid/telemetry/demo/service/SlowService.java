@@ -7,8 +7,15 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class SlowService {
 
+    private final LoadPressureService loadPressureService;
+
+    public SlowService(LoadPressureService loadPressureService) {
+        this.loadPressureService = loadPressureService;
+    }
+
     public long simulateSlowHttpOperation() {
-        long durationMs = ThreadLocalRandom.current().nextLong(900, 1600);
+        long durationMs = ThreadLocalRandom.current().nextLong(350, 800)
+                + loadPressureService.latencyPenaltyMs(200, 4_500);
         sleep(durationMs);
         return durationMs;
     }

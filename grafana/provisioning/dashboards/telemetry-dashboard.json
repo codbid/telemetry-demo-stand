@@ -58,7 +58,7 @@
         "includeAll": false,
         "multi": false,
         "sort": 1,
-        "current": { "selected": true, "text": "1m", "value": "1m" }
+        "current": { "selected": true, "text": "15s", "value": "15s" }
       },
       {
         "name": "slo_rule",
@@ -91,7 +91,7 @@
       "id": 1,
       "type": "stat",
       "title": "Статус SLO",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "sum(slo_violations) > bool 0", "refId": "A" }],
       "fieldConfig": {
@@ -130,7 +130,7 @@
       "id": 2,
       "type": "stat",
       "title": "Нарушения SLO",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "sum(slo_violations)", "refId": "A" }],
       "fieldConfig": {
@@ -160,7 +160,7 @@
       "id": 3,
       "type": "stat",
       "title": "Правила SLO",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "sum(slo_rules)", "refId": "A" }],
       "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
@@ -177,7 +177,7 @@
       "id": 4,
       "type": "stat",
       "title": "Проверки SLO",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "expr": "sum(slo_results)", "refId": "A" }],
       "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
@@ -194,12 +194,12 @@
       "id": 5,
       "type": "timeseries",
       "title": "Запросы в секунду",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum by (service, operation, kind) (telemetry_window_rps{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "sum by (service, kind) (telemetry_window_rps{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
@@ -210,12 +210,12 @@
       "id": 6,
       "type": "timeseries",
       "title": "Доля ошибок",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "100 * sum by (service, operation, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}) / clamp_min(sum by (service, operation, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}), 1)",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "100 * sum by (service, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}) / clamp_min(sum by (service, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"}), 1)",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
@@ -241,12 +241,12 @@
       "id": 7,
       "type": "timeseries",
       "title": "Задержка P95",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "max by (service, operation, kind) (telemetry_window_latency_p95_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "max by (service, kind) (telemetry_window_latency_p95_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
@@ -257,12 +257,12 @@
       "id": 8,
       "type": "timeseries",
       "title": "Задержка P99",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "max by (service, operation, kind) (telemetry_window_latency_p99_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "max by (service, kind) (telemetry_window_latency_p99_ms{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
@@ -273,12 +273,12 @@
       "id": 9,
       "type": "timeseries",
       "title": "Запросы за окно",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum by (service, operation, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "sum by (service, kind) (telemetry_window_requests{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
@@ -289,12 +289,12 @@
       "id": 10,
       "type": "timeseries",
       "title": "Ошибки за окно",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum by (service, operation, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
-          "legendFormat": "{{service}} | {{operation}} | {{kind}}",
+          "expr": "sum by (service, kind) (telemetry_window_errors{service=~\"$service\",operation=~\"$operation\",kind=~\"$kind\",window=\"$window\"})",
+          "legendFormat": "{{service}} | {{kind}}",
           "refId": "A"
         }
       ],
